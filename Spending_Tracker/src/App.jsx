@@ -1,3 +1,4 @@
+// src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -25,15 +26,11 @@ const loadCategories = async () => {
     const res = await fetch('/spending-category.json');
     if (!res.ok) throw new Error('Failed to fetch categories');
     const categories = await res.json();
-    return Array.isArray(categories) && categories.length ? categories : [
-      'Food', 'Transportation', 'Entertainment', 'Shopping',
-      'Healthcare', 'Utilities', 'Education', 'Other'
-    ];
+    return Array.isArray(categories) && categories.length
+      ? categories
+      : ['Food', 'Transportation', 'Entertainment', 'Shopping', 'Healthcare', 'Utilities', 'Education', 'Other'];
   } catch {
-    return [
-      'Food', 'Transportation', 'Entertainment', 'Shopping',
-      'Healthcare', 'Utilities', 'Education', 'Other'
-    ];
+    return ['Food', 'Transportation', 'Entertainment', 'Shopping', 'Healthcare', 'Utilities', 'Education', 'Other'];
   }
 };
 
@@ -64,7 +61,7 @@ function App() {
   };
 
   const removeExpense = (id) => {
-    const updatedExpenses = expenses.filter(exp => exp.id !== id);
+    const updatedExpenses = expenses.filter((exp) => exp.id !== id);
     setExpenses(updatedExpenses);
     saveExpenses(updatedExpenses);
   };
@@ -77,7 +74,7 @@ function App() {
   };
 
   const removeCategory = (category) => {
-    const updatedCategories = categories.filter(cat => cat !== category);
+    const updatedCategories = categories.filter((cat) => cat !== category);
     setCategories(updatedCategories);
     localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(updatedCategories));
   };
@@ -86,18 +83,9 @@ function App() {
 
   return (
     <Router>
-      <div className="bg-gray-900 text-white min-h-screen overflow-x-hidden">
+      <div className="bg-gradient-to-br from-indigo-100 to-blue-50 text-gray-900 min-h-screen flex">
         <Navigation />
-        <main 
-          style={{ 
-            marginLeft: '256px',
-            minHeight: '100vh',
-            width: 'calc(100vw - 256px)',
-            maxWidth: 'calc(100vw - 256px)',
-            overflowX: 'auto'
-          }} 
-          className="p-6"
-        >
+        <main className="ml-64 p-8 w-full min-h-screen">
           <Routes>
             <Route
               path="/"

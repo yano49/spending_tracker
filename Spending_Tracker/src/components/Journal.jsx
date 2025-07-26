@@ -1,152 +1,185 @@
 import React, { useState } from 'react';
 
-function Journal({
-  expenses = [],
+const timeOptions = ['Daily', 'Weekly', 'Monthly'];
+
+const Journal = ({
+  expenses,
+  categories,
   addExpense,
   removeExpense,
-  categories = [],
-  addCustomCategory
-}) {
-  const [form, setForm] = useState({ date: '', category: '', amount: '' });
-  const [customCategory, setCustomCategory] = useState('');
+  addCustomCategory,
+  removeCategory
+}) => {
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState(categories[0] || '');
+  const [newCategory, setNewCategory] = useState('');
+  const [timeFilter, setTimeFilter] = useState('Monthly');
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.date || !form.category || !form.amount) {
-      alert("Please fill in all fields.");
-      return;
-    }
-    if (parseFloat(form.amount) <= 0) {
-      alert("Amount must be a positive number.");
-      return;
-    }
+  const handleAddExpense = () => {
+    if (!description || !amount || !category) return;
     addExpense({
-      date: form.date,
-      category: form.category,
-      amount: parseFloat(form.amount)
+      description,
+      amount: parseFloat(amount),
+      category,
+      date: new Date().toISOString()
     });
-    setForm({ date: '', category: '', amount: '' });
+    setDescription('');
+    setAmount('');
   };
 
-  const handleAddCustomCategory = () => {
-    if (customCategory.trim()) {
-      addCustomCategory(customCategory.trim());
-      setCustomCategory('');
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (trimmed && !categories.includes(trimmed)) {
+      addCustomCategory(trimmed);
+      setCategory(trimmed); // select the new one
+      setNewCategory('');
     }
+  };
+
+  const handleRemoveCategory = (cat) => {
+    removeCategory(cat);
+    if (category === cat) {
+      const updated = categories.filter((c) => c !== cat);
+      setCategory(updated[0] || '');
+    }
+  };
+
+  const getFilteredExpenses = () => {
+    const now = new Date();
+    return expenses.filter((exp) => {
+      const date = new Date(exp.date || exp.id);
+      const diffDays = (now - date) / (1000 * 60 * 60 * 24);
+      if (timeFilter === 'Daily') return diffDays < 1;
+      if (timeFilter === 'Weekly') return diffDays <= 7;
+      if (timeFilter === 'Monthly') {
+        return (
+          date.getMonth() === now.getMonth() &&
+          date.getFullYear() === now.getFullYear()
+        );
+      }
+      return true;
+    });
   };
 
   return (
-    <div className="p-8 bg-gray-900 min-h-screen text-white">
-      <h2 className="text-3xl font-bold mb-6">Journal</h2>
+    <div className="space-y-6">
+      <h2 className="text-3xl font-semibold text-indigo-800">📝 Spending Journal</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4 mb-8 max-w-xl">
-        <div>
-          <label className="block mb-1">Date:</label>
-          <input
-            type="date"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            required
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1">Category:</label>
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            required
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          >
-            <option value="" disabled>
-              -- Select Category --
-            </option>
-            {categories.length > 0 ? (
-              categories.map((cat, idx) => (
-                <option key={idx} value={cat}>
-                  {cat}
-                </option>
-              ))
-            ) : (
-              <option disabled>No categories available</option>
-            )}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1">Amount:</label>
-          <input
-            type="number"
-            name="amount"
-            value={form.amount}
-            onChange={handleChange}
-            step="0.01"
-            min="0"
-            required
-            className="w-full p-2 rounded bg-gray-800 text-white"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded"
+      {/* Input Fields */}
+      <div className="flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="px-3 py-2 rounded border border-indigo-300"
+        />
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="px-3 py-2 rounded border border-indigo-300"
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="px-3 py-2 rounded border border-indigo-300"
         >
-          Add Expense
+          {categories.map((cat, idx) => (
+            <option key={idx}>{cat}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleAddExpense}
+          className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"
+        >
+          Add
         </button>
-      </form>
+      </div>
 
-      <div className="max-w-xl mb-10">
-        <h3 className="text-xl font-semibold mb-3">Add Custom Category</h3>
-        <div className="flex gap-2">
+      {/* Time Filter */}
+      <div className="flex gap-2 items-center">
+        <label className="text-indigo-700 font-medium">Filter By:</label>
+        {timeOptions.map((opt) => (
+          <button
+            key={opt}
+            onClick={() => setTimeFilter(opt)}
+            className={`px-3 py-1 rounded border ${
+              timeFilter === opt
+                ? 'bg-indigo-500 text-white'
+                : 'border-indigo-300 text-indigo-700'
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+
+      {/* Category Editor */}
+      <div className="mt-4 space-y-2">
+        <h4 className="text-lg font-medium text-indigo-800">Manage Categories</h4>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((cat, idx) => (
+            <div
+              key={idx}
+              className="flex items-center bg-gray-100 px-2 py-1 rounded shadow text-indigo-800"
+            >
+              {cat}
+              <button
+                onClick={() => handleRemoveCategory(cat)}
+                className="ml-2 text-red-500 font-bold"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 mt-2">
           <input
             type="text"
-            placeholder="New category name"
-            value={customCategory}
-            onChange={(e) => setCustomCategory(e.target.value)}
-            className="flex-grow p-2 rounded bg-gray-800 text-white"
+            placeholder="New Category"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            className="px-2 py-1 rounded border border-indigo-300"
           />
           <button
-            onClick={handleAddCustomCategory}
-            className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded"
+            onClick={handleAddCategory}
+            className="bg-indigo-400 text-white px-3 py-1 rounded hover:bg-indigo-500"
           >
-            Add
+            Add Category
           </button>
         </div>
       </div>
 
-      <h3 className="text-2xl font-semibold mb-4">Expenses</h3>
-      {Array.isArray(expenses) && expenses.length > 0 ? (
-        <ul className="space-y-4 max-w-xl">
-          {expenses.slice().reverse().map((exp) => (
-            <li key={exp.id} className="flex justify-between items-center bg-gray-800 p-4 rounded">
-              <div>
-                <div className="font-semibold">{exp.date}</div>
-                <div className="text-gray-400">{exp.category}</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="font-semibold text-green-400">${exp.amount.toFixed(2)}</div>
-                <button
-                  onClick={() => removeExpense(exp.id)}
-                  className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded"
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-gray-400">No expenses recorded yet.</p>
-      )}
+      {/* Expense List */}
+      <div className="mt-6 space-y-4">
+        {getFilteredExpenses().map((exp) => (
+          <div
+            key={exp.id}
+            className="flex justify-between items-center bg-white/70 p-3 rounded shadow text-indigo-900"
+          >
+            <div>
+              <p className="font-medium">{exp.description}</p>
+              <p className="text-sm text-gray-500">
+                ฿{exp.amount.toFixed(2)} — {exp.category}
+              </p>
+              <p className="text-xs text-gray-400">
+                {new Date(exp.date || exp.id).toLocaleString()}
+              </p>
+            </div>
+            <button
+              onClick={() => removeExpense(exp.id)}
+              className="text-red-500 hover:text-red-700 font-semibold"
+            >
+              Delete
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};
 
 export default Journal;

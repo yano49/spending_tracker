@@ -1,35 +1,132 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Navigation from './components/Navigation.jsx';
+import AnalyticsDashboard from './components/AnalyticDashboard.jsx';
+import Journal from './components/Journal.jsx';
+
+const STORAGE_KEY_EXPENSES = 'spendingTrackerExpenses';
+const STORAGE_KEY_CATEGORIES = 'spendingTrackerCategories';
+
+const loadExpenses = () => {
+  const data = localStorage.getItem(STORAGE_KEY_EXPENSES);
+  return data ? JSON.parse(data) : [];
+};
+
+const saveExpenses = (expenses) => {
+  localStorage.setItem(STORAGE_KEY_EXPENSES, JSON.stringify(expenses));
+};
+
+const loadCategories = async () => {
+  const data = localStorage.getItem(STORAGE_KEY_CATEGORIES);
+  if (data) return JSON.parse(data);
+
+  try {
+    const res = await fetch('/spending-category.json');
+    if (!res.ok) throw new Error('Failed to fetch categories');
+    const categories = await res.json();
+    return Array.isArray(categories) && categories.length ? categories : [
+      'Food', 'Transportation', 'Entertainment', 'Shopping',
+      'Healthcare', 'Utilities', 'Education', 'Other'
+    ];
+  } catch {
+    return [
+      'Food', 'Transportation', 'Entertainment', 'Shopping',
+      'Healthcare', 'Utilities', 'Education', 'Other'
+    ];
+  }
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [expenses, setExpenses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setExpenses(loadExpenses());
+      const cats = await loadCategories();
+      setCategories(cats);
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
+
+  const addExpense = (expense) => {
+    const newExpense = {
+      ...expense,
+      id: Date.now(),
+      amount: parseFloat(expense.amount) || 0,
+    };
+    const updatedExpenses = [...expenses, newExpense];
+    setExpenses(updatedExpenses);
+    saveExpenses(updatedExpenses);
+  };
+
+  const removeExpense = (id) => {
+    const updatedExpenses = expenses.filter(exp => exp.id !== id);
+    setExpenses(updatedExpenses);
+    saveExpenses(updatedExpenses);
+  };
+
+  const addCustomCategory = (category) => {
+    if (!category || categories.includes(category)) return;
+    const updatedCategories = [...categories, category];
+    setCategories(updatedCategories);
+    localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(updatedCategories));
+  };
+
+  const removeCategory = (category) => {
+    const updatedCategories = categories.filter(cat => cat !== category);
+    setCategories(updatedCategories);
+    localStorage.setItem(STORAGE_KEY_CATEGORIES, JSON.stringify(updatedCategories));
+  };
+
+  if (loading) return <div className="text-white p-8">Loading app data...</div>;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="bg-gray-900 text-white min-h-screen overflow-x-hidden">
+        <Navigation />
+        <main 
+          style={{ 
+            marginLeft: '256px',
+            minHeight: '100vh',
+            width: 'calc(100vw - 256px)',
+            maxWidth: 'calc(100vw - 256px)',
+            overflowX: 'auto'
+          }} 
+          className="p-6"
+        >
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <AnalyticsDashboard
+                  expenses={expenses}
+                  categories={categories}
+                  addCustomCategory={addCustomCategory}
+                  removeCategory={removeCategory}
+                />
+              }
+            />
+            <Route
+              path="/journal"
+              element={
+                <Journal
+                  expenses={expenses}
+                  categories={categories}
+                  addExpense={addExpense}
+                  removeExpense={removeExpense}
+                  addCustomCategory={addCustomCategory}
+                />
+              }
+            />
+          </Routes>
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;

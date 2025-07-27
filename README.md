@@ -16,8 +16,7 @@ This project emphasizes:
 * Interactive charts (Bar, Pie, and Line) for visual analytics.
 * Responsive design for both desktop and mobile usage.
 
+## Programming Language that we use
+<img src="https://raw.githubusercontent.com/github/explore/main/topics/vite/vite.png" width="40" /> <img src="https://raw.githubusercontent.com/github/explore/main/topics/react/react.png" width="40" />
+
 ## Screenshots
-<img src="https://raw.githubusercontent.com/github/explore/main/topics/vite/vite.png" width="40" />
-<img src="https://raw.githubusercontent.com/github/explore/main/topics/react/react.png" width="40" />
-
-

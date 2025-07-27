@@ -1,4 +1,4 @@
-# WAD (Section#541) Project01 - Spending Tracker
+# WAD (Section#542) Project01 - Spending Tracker
 
 ## Team Members
 - Aung Kaung Myat

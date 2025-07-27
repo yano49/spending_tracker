@@ -15,6 +15,19 @@ const Journal = ({
   const [category, setCategory] = useState(categories[0] || '');
   const [newCategory, setNewCategory] = useState('');
   const [timeFilter, setTimeFilter] = useState('Monthly');
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
+    return localISOTime;
+  });
+
+  const getLocalDateTimeString = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
+    return localISOTime;
+  };
 
   const handleAddExpense = () => {
     if (!description || !amount || !category) return;
@@ -22,10 +35,11 @@ const Journal = ({
       description,
       amount: parseFloat(amount),
       category,
-      date: new Date().toISOString()
+      date: new Date(selectedDate).toISOString()
     });
     setDescription('');
     setAmount('');
+    setSelectedDate(getLocalDateTimeString());
   };
 
   const handleAddCategory = () => {
@@ -91,6 +105,12 @@ const Journal = ({
             <option key={idx}>{cat}</option>
           ))}
         </select>
+        <input
+          type="datetime-local"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-3 py-2 rounded border border-indigo-300"
+        />
         <button
           onClick={handleAddExpense}
           className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600"

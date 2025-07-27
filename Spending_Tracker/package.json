@@ -1,5 +1,5 @@
 {
-  "name": "spending_tracker",
+ "name": "spending_tracker",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.21",
+    "gh-pages": "^6.3.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "vite": "^7.0.6"

@@ -20,3 +20,8 @@ This project emphasizes:
 <img src="https://raw.githubusercontent.com/github/explore/main/topics/vite/vite.png" width="40" /> <img src="https://raw.githubusercontent.com/github/explore/main/topics/react/react.png" width="40" />
 
 ## Screenshots
+### 📊 Analytics Dashboard
+![Analytics Dashboard](./screen_shots/dashboard.png)
+
+### 📓 Spending Journal
+![Spending Journal](./screen_shots/journal.png)

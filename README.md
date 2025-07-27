@@ -26,3 +26,8 @@ This project emphasizes:
 
 ### 📘 Journal Page
 ![Journal Screenshot](./screen_shot/journal.png)
+
+## 🔗 Live Demo
+
+Check out the deployed project here:  
+👉 [SpendWise GitHub Pages](https://yano49.github.io/spending_tracker/)
